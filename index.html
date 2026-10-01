@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quotation & Invoice Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=Cormorant+Garamond:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{--bg:#f4f2ef;--panel:#fff;--ink:#222;--mut:#777;--line:#ddd;--acc:#b89b78;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1a19;--panel:#262523;--ink:#eee;--mut:#999;--line:#3a3836}}
+:root[data-theme="dark"]{--bg:#1b1a19;--panel:#262523;--ink:#eee;--mut:#999;--line:#3a3836}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Sarabun',sans-serif;font-size:14px}
+.app{display:grid;grid-template-columns:420px 1fr;min-height:100vh}
+.form{background:var(--panel);padding:20px;overflow:auto;height:100vh;position:sticky;top:0;border-right:1px solid var(--line)}
+.form h2{margin:0 0 14px;font-size:18px}
+.form h3{margin:20px 0 8px;font-size:13px;color:var(--acc);text-transform:uppercase;letter-spacing:.04em}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
+input,textarea,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink);font:inherit}
+textarea{resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}
+.item .r3{display:grid;grid-template-columns:70px 1fr 90px;gap:8px;margin-top:6px;align-items:end}
+.item .tot{text-align:right;font-weight:600;padding:8px 0}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:8px 12px}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.x{color:#c44;padding:2px 8px}
+.seg{display:flex;gap:6px}.seg button{flex:1}.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pv{padding:16px;overflow:auto;height:100vh}
+.bar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;position:sticky;top:0;z-index:2}
+#wrap{margin:0 auto;width:794px}
+#sheet{width:794px;height:1123px;background:#fff;color:#000;padding:56px 56px;position:relative;transform-origin:top left;box-shadow:0 2px 14px rgba(0,0,0,.18);font-size:14px;line-height:1.5}
+#sheet .hd{display:flex;justify-content:space-between;align-items:flex-start}
+#sheet .logo{width:100px;height:100px;background:#f5f2f1;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:52px;color:#d9c3a5}
+#sheet .logo img{max-width:100%;max-height:100%}
+#sheet .ti{text-align:right}.ti h1{margin:0 0 8px;font-size:24px}.ti div{margin-bottom:4px}
+#sheet .meta{display:flex;justify-content:space-between;margin:34px 0 24px;gap:20px}
+#sheet table{width:100%;border-collapse:collapse;margin-top:6px}
+#sheet th,#sheet td{border:1px solid #555;padding:6px 10px}
+#sheet th{text-align:center}.n{text-align:right}.c{text-align:center}
+#sheet .g td{background:#bdbdbd;font-weight:600}
+.red{color:#d32f2f}b{font-weight:700}
+.pre{white-space:pre-line}
+@media (max-width:900px){.app{grid-template-columns:1fr}.form,.pv{height:auto;position:static}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="form" id="form">
+  <h2>สร้างใบเสนอราคา / ใบแจ้งหนี้</h2>
+  <div class="seg" id="seg"><button data-t="quote">ใบเสนอราคา</button><button data-t="invoice">ใบแจ้งหนี้</button></div>
+
+  <h3>ผู้ออกเอกสาร</h3>
+  <label>ชื่อบริษัท / สตูดิโอ</label><input data-k="company">
+  <label>โดย</label><input data-k="by">
+  <label>อีเมลติดต่อ</label><input data-k="email">
+  <label>โลโก้ (อัปโหลดเพื่อเปลี่ยน)</label><input type="file" id="logoIn" accept="image/*">
+
+  <h3>รายละเอียดเอกสาร</h3>
+  <div class="row"><div><label>เลขที่เอกสาร</label><input data-k="no"></div><div><label>วันที่</label><input type="date" data-k="date"></div></div>
+  <label style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="checkbox" id="auto" style="width:auto"> รันเลขที่อัตโนมัติ · ลำดับถัดไป <input type="number" id="seq" min="1" style="width:76px"></label>
+  <div class="row"><div><label>ชื่องาน</label><input data-k="job"></div><div><label>กำหนดชำระ / ยืนราคาถึง</label><input type="date" data-k="due"></div></div>
+
+  <h3>ลูกค้า</h3>
+  <label>ชื่อลูกค้า / บริษัท</label><input data-k="cust">
+  <label>ที่อยู่ / ข้อมูลลูกค้า</label><textarea rows="3" data-k="addr"></textarea>
+
+  <h3>รายการ</h3>
+  <div id="items"></div>
+  <button id="add">+ เพิ่มรายการ</button>
+
+  <h3>สรุปราคา</h3>
+  <div class="row"><div><label>หัก ณ ที่จ่าย (%)</label><input type="number" step="0.01" min="0" data-k="wht"></div><div><label>ส่วนลด (บาท)</label><input type="number" min="0" data-k="disc"></div></div>
+
+  <h3>ช่องทางชำระเงิน</h3>
+  <label>ชื่อบัญชี (ไทย)</label><input data-k="accTh">
+  <label>ชื่อบัญชี (อังกฤษ)</label><input data-k="accEn">
+  <div class="row"><div><label>เลขที่บัญชี</label><input data-k="accNo"></div><div><label>ธนาคาร</label><input data-k="bank"></div></div>
+  <label>หมายเหตุท้ายเอกสาร</label><textarea rows="2" data-k="note"></textarea>
+</div>
+
+<div class="pv" id="pv">
+  <div class="bar"><button id="print">พิมพ์ / Save as PDF</button><button class="pri" id="dl">⬇ ดาวน์โหลด PDF</button></div>
+  <div id="wrap"><div id="sheet"></div></div>
+</div>
+</div>
+
+<script>
+const today=new Date().toLocaleDateString('sv-SE');
+const D={type:'invoice',company:'',by:'',email:'',no:'',date:today,due:'',job:'',cust:'',addr:'',
+items:[{d:'',q:1,p:0}],wht:3,disc:0,accTh:'',accEn:'',accNo:'',bank:'',
+note:'* ผู้ว่าจ้างจะต้องออกหนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ) ให้ผู้ออกแบบทันทีหลังชำระค่าบริการ',logo:'',auto:true,seq:{quote:1,invoice:1}};
+let S=Object.assign({},D);
+try{const s=localStorage.getItem('rin-doc');if(s)S=Object.assign({},D,JSON.parse(s))}catch(e){}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=v=>parseFloat(v)||0;
+const fmt=n=>n.toLocaleString('en-US',{minimumFractionDigits:Number.isInteger(+n.toFixed(2))?0:2,maximumFractionDigits:2});
+const thDate=s=>{if(!s)return'';const d=new Date(s+'T00:00:00');return d.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})};
+
+function save(){try{localStorage.setItem('rin-doc',JSON.stringify(S))}catch(e){}}
+function calc(){
+  const sub=S.items.reduce((a,i)=>a+num(i.q)*num(i.p),0);
+  const base=Math.max(sub-num(S.disc),0);
+  const wht=Math.round(base*num(S.wht))/100;
+  return{sub,base,wht,total:base-wht};
+}
+function renderItems(){
+  $('items').innerHTML=S.items.map((it,i)=>`<div class="item">
+    <div style="display:flex;gap:6px"><input data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="รายละเอียด"><button class="x" data-del="${i}">✕</button></div>
+    <div class="r3"><div><label>จำนวน</label><input type="number" data-i="${i}" data-f="q" value="${esc(it.q)}"></div>
+    <div><label>ราคาต่อหน่วย</label><input type="number" data-i="${i}" data-f="p" value="${esc(it.p)}"></div>
+    <div class="tot" id="t${i}">${fmt(num(it.q)*num(it.p))}</div></div></div>`).join('');
+}
+function renderPV(){
+  const q=S.type==='quote',c=calc();
+  const rows=S.items.map((it,i)=>`<tr><td>${i+1}. ${esc(it.d)}</td><td class="c">${fmt(num(it.q))}</td><td class="n">${fmt(num(it.p))}</td><td class="n">${fmt(num(it.q)*num(it.p))}</td></tr>`).join('');
+  $('sheet').innerHTML=`
+  <div class="hd"><div class="logo">${S.logo?`<img src="${S.logo}">`:esc((S.company||'LOGO').trim().slice(0,3).toUpperCase())}</div>
+    <div class="ti"><h1>${q?'ใบเสนอราคา/QUOTATION':'ใบแจ้งหนี้/INVOICE'}</h1><div>${esc(S.company)}</div><div>โดย ${esc(S.by)}</div>${S.email?`<div>${esc(S.email)}</div>`:''}</div></div>
+  <div class="meta"><div><b>${q?'เสนอราคาถึง :':'เรียกเก็บเงินไปยัง :'}</b><div style="margin-top:8px"><div>${esc(S.cust)}</div><div class="pre">${esc(S.addr)}</div></div></div>
+    <div style="text-align:right"><div><b>${q?'ใบเสนอราคาเลขที่':'ใบแจ้งหนี้เลขที่'}/No. : ${esc(S.no)}</b></div><div style="margin-top:8px"><b>วันที่ ${thDate(S.date)}</b></div>${S.job?`<div style="margin-top:8px">งาน: ${esc(S.job)}</div>`:''}</div></div>
+  <table><tr><th style="width:46%">รายละเอียด</th><th>จำนวน</th><th>ราคาต่อหน่วย</th><th>ยอดรวม</th></tr>${rows}
+    <tr><td style="height:34px"></td><td></td><td></td><td></td></tr>
+    <tr class="g"><td colspan="3" class="c">รวมเป็นเงิน</td><td class="n">${fmt(c.sub)}</td></tr>
+    ${num(S.disc)?`<tr class="g"><td colspan="3" class="c">ส่วนลด</td><td class="n">-${fmt(num(S.disc))}</td></tr>`:''}
+    <tr class="g"><td colspan="3" class="c">หักภาษี ณ ที่จ่าย ${fmt(num(S.wht))}%</td><td class="n">-${fmt(c.wht)}</td></tr>
+    <tr class="g"><td colspan="3" class="c">ราคารวมทั้งหมด (บาท)</td><td class="n">${fmt(c.total)}</td></tr></table>
+  <div style="margin-top:34px"><b>ช่องทางการชำระเงิน</b> ${S.due?`<span class="red">* ${q?'ราคานี้ยืนถึงวันที่':'ชำระค่าบริการภายในวันที่'} ${thDate(S.due)}</span>`:''}</div>
+  <table style="border:0;margin-top:12px;width:auto"><style>#sheet .pay td{border:0;padding:4px 40px 4px 0}</style>
+    <tr class="pay"><td><b>ชื่อบัญชี</b></td><td>${esc(S.accTh)}<br>${esc(S.accEn)}</td></tr>
+    <tr class="pay"><td><b>เลขที่บัญชี</b></td><td>${esc(S.accNo)}</td></tr>
+    <tr class="pay"><td><b>ธนาคาร</b></td><td>${esc(S.bank)}</td></tr></table>
+  <div class="red pre" style="position:absolute;left:56px;right:56px;bottom:56px">${esc(S.note)}</div>`;
+  fit();
+}
+function fit(){
+  const w=$('pv').clientWidth-32,s=Math.min(1,w/794);
+  $('sheet').style.transform=`scale(${s})`;
+  $('wrap').style.width=794*s+'px';$('wrap').style.height=1123*s+'px';
+}
+function setSeg(){document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.type))}
+function fillForm(){document.querySelectorAll('[data-k]').forEach(e=>e.value=S[e.dataset.k]??'')}
+function autoNo(){const d=(S.date||'').replace(/-/g,'').slice(2);return `${S.type==='quote'?'QT':'INV'}-${d}-${String(S.seq[S.type]).padStart(3,'0')}`}
+function syncSeq(){$('seq').value=S.seq[S.type]}
+function bump(){if(S.auto){S.seq[S.type]++;syncSeq();upd()}}
+function upd(){if(S.auto){S.no=autoNo();const n=document.querySelector('[data-k=no]');if(n)n.value=S.no}save();renderPV()}
+
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='auto'){S.auto=t.checked;upd();return}
+  if(t.id==='seq'){S.seq[S.type]=Math.max(1,parseInt(t.value)||1);upd();return}
+  if(t.dataset.k){if(t.dataset.k==='no'){S.auto=false;$('auto').checked=false}S[t.dataset.k]=t.value;upd()}
+  else if(t.dataset.i!==undefined){const it=S.items[t.dataset.i];it[t.dataset.f]=t.value;
+    $('t'+t.dataset.i).textContent=fmt(num(it.q)*num(it.p));upd()}
+});
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.dataset.t){S.type=t.dataset.t;setSeg();syncSeq();upd()}
+  if(t.dataset.del!==undefined){S.items.splice(t.dataset.del,1);renderItems();upd()}
+});
+$('add').onclick=()=>{S.items.push({d:'',q:1,p:0});renderItems();upd()};
+$('logoIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{S.logo=r.result;upd()};r.readAsDataURL(f)};
+$('print').onclick=()=>{const sh=$('sheet'),o=sh.style.transform;sh.style.transform='none';
+  const st=document.createElement('style');st.textContent='@page{size:A4;margin:0}@media print{body *{visibility:hidden}#sheet,#sheet *{visibility:visible}#sheet{position:fixed;left:0;top:0;box-shadow:none}}';
+  document.head.appendChild(st);window.print();st.remove();sh.style.transform=o;bump()};
+$('dl').onclick=async()=>{
+  const sh=$('sheet'),o=sh.style.transform;sh.style.transform='none';$('wrap').style.overflow='visible';
+  try{await html2pdf().set({margin:0,filename:(S.no||'document')+'.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0},jsPDF:{unit:'px',format:[794,1123],hotfixes:['px_scaling']}}).from(sh).save();bump()}
+  catch(err){alert('ดาวน์โหลดไม่สำเร็จ ลองใช้ปุ่ม "พิมพ์ / Save as PDF" แทน')}
+  sh.style.transform=o;fit();
+};
+window.addEventListener('resize',fit);
+setSeg();fillForm();renderItems();$('auto').checked=S.auto;syncSeq();upd();
+document.fonts&&document.fonts.ready.then(renderPV);
+</script>
+</body>
+</html>
