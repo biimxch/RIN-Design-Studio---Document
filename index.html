@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&family=Cormorant+Garamond:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-:root{--bg:#f4f2ef;--panel:#fff;--ink:#222;--mut:#777;--line:#ddd;--acc:#b89b78}
+:root{--bg:#f4f2ef;--panel:#fff;--ink:#222;--mut:#777;--line:#ddd;--acc:#EC8D5F;--on:#2b1a10}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1a19;--panel:#262523;--ink:#eee;--mut:#999;--line:#3a3836}}
 :root[data-theme="dark"]{--bg:#1b1a19;--panel:#262523;--ink:#eee;--mut:#999;--line:#3a3836}
 *{box-sizing:border-box}[hidden]{display:none!important}
@@ -19,23 +19,24 @@ label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
 input,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink);font:inherit}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 details{border:1px solid var(--line);border-radius:8px;margin-top:10px}
-summary{cursor:pointer;padding:10px 12px;font-weight:600;list-style:none;display:flex;justify-content:space-between}
+summary{cursor:pointer;padding:10px 12px;font-weight:500;list-style:none;display:flex;justify-content:space-between}
 summary::-webkit-details-marker{display:none}summary::after{content:'▾';color:var(--mut)}details[open] summary::after{content:'▴'}
 details>.b{padding:4px 12px 12px}
 details[open]{border-color:var(--acc)}
-details[open]>summary{background:var(--acc);color:#fff;border-radius:7px 7px 0 0}
-details[open]>summary::after{color:#fff}
-#sheet b,#sheet th,#sheet .g td{font-weight:500}#sheet .ti h1{font-weight:500}
+details[open]>summary{background:var(--acc);color:var(--on);border-radius:7px 7px 0 0}
+details[open]>summary::after{color:var(--on)}
+#sheet b,#sheet th{font-weight:400}#sheet .ti h1{font-weight:500}
 .item{border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px}
-.tot{padding:8px 0;font-weight:600}
+.tot{padding:8px 0;font-weight:400}
 .chk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--ink)}.chk input{width:auto}.chk input[type=number]{width:76px}
 button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:8px 12px}
-button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+button.pri{background:var(--acc);border-color:var(--acc);color:var(--on);font-weight:500}
 .x{color:#c44;padding:2px 8px}.add{margin-top:8px}
-.seg{display:flex;gap:6px}.seg button{flex:1;padding:8px 4px}.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:8px 4px}.seg button.on{background:var(--acc);color:var(--on);border-color:var(--acc)}
 .sm{font-size:12px;color:var(--mut);margin-top:8px;word-break:break-all}
 .pv{padding:16px;overflow:auto;height:100vh}
-.bar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;position:sticky;top:0;z-index:2}
+.bar{display:flex;gap:8px;justify-content:flex-end;margin:-16px -16px 12px;padding:12px 16px;position:sticky;top:-16px;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar button{background:var(--panel)}.bar button.pri{background:var(--acc)}
 #wrap{margin:0 auto;width:794px}
 #sheet{width:794px;height:1120px;background:#fff;color:#000;padding:56px;position:relative;transform-origin:top left;box-shadow:0 2px 14px rgba(0,0,0,.18);font-size:13px;line-height:1.6;font-weight:300;overflow:hidden}
 #sheet .hd{display:flex;justify-content:space-between;align-items:flex-start}
@@ -43,12 +44,13 @@ button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:
 #sheet .logo img{max-width:100%;max-height:100%}
 #sheet .ti{text-align:right}.ti h1{margin:0 0 8px;font-size:24px}.ti div{margin-bottom:4px}
 #sheet .meta{display:flex;justify-content:space-between;margin:34px 0 24px;gap:20px}
-#sheet table.t{width:100%;border-collapse:collapse}
-#sheet .t th,#sheet .t td{border:1px solid #555;padding:6px 10px}
+#sheet table.t{width:100%;border-collapse:separate;border-spacing:0;border-top:1px solid #444;border-left:1px solid #444}
+#sheet .t th,#sheet .t td{border-right:1px solid #444;border-bottom:1px solid #444;padding:6px 10px}
 #sheet .t td+td,#sheet .t th+th{text-align:center;width:33%}
-#sheet .t .g td{background:#bdbdbd;font-weight:600}#sheet .t .g td:first-child{text-align:center}
+#sheet .t .g td{background:#DFE384;font-weight:400}#sheet .t .g td:first-child{text-align:center}
 #sheet .g2{display:grid;grid-template-columns:165px 1fr;margin-top:24px}#sheet .g2 p{margin:0 0 7px}
 #sheet table.pay td{padding:4px 40px 4px 0;vertical-align:top}
+#sheet,#sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .red{color:#d32f2f}.pre{white-space:pre-line}
 @media (max-width:900px){.app{grid-template-columns:1fr}.form,.pv{height:auto;position:static}}
 </style>
@@ -168,7 +170,7 @@ function renderPV(){
     if(inv)body=`<div style="margin-top:34px"><b>ช่องทางการชำระเงิน</b> <span class="red">* ชำระค่าบริการภายในวันที่ ${thDate(S.due)||'.................'}</span></div><div style="margin-top:8px">${accBlock()}</div>
     <div class="red" style="position:absolute;left:56px;right:56px;bottom:56px">${WHTNOTE}</div>`;
     if(rc)body=`<div style="display:flex;justify-content:space-between;margin-top:34px"><div><b>โอนเงินมายัง :</b><div style="margin-top:8px">${accBlock()}</div></div>
-    <div style="text-align:center;width:270px"><div>ลงชื่อ ......................................</div><div style="margin-top:18px">(${ACC.th})</div><div style="margin-top:8px"><b>ผู้รับเงิน</b></div></div></div>`;
+    <div style="text-align:center;width:270px"><div>ลงชื่อ .....................................................</div><div style="margin-top:18px">(${ACC.th})</div><div style="margin-top:8px"><b>ผู้รับเงิน</b></div></div></div>`;
   }
   $('sheet').innerHTML=`<div class="hd"><div class="logo">${logo}</div><div class="ti"><h1>${TT[S.type][0]}</h1><div>${esc(S.company)}</div><div>โดย ${esc(S.by)}</div></div></div>
   <div class="meta">${left}<div style="text-align:right"><div><b>${TT[S.type][1]}/No. : ${esc(getNo())}</b></div><div style="margin-top:8px"><b>วันที่ ${thDate(S.date)}</b></div></div></div>${table}${body}`;
@@ -198,10 +200,19 @@ $('logoIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new File
 $('print').onclick=()=>{const sh=$('sheet'),o=sh.style.transform,ot=document.title;sh.style.transform='none';document.title=fileName();
   const st=document.createElement('style');st.textContent='@page{size:A4;margin:0}@media print{body *{visibility:hidden}#sheet,#sheet *{visibility:visible}#sheet{position:fixed;left:0;top:0;box-shadow:none}}';
   document.head.appendChild(st);window.print();st.remove();sh.style.transform=o;document.title=ot;bump()};
-$('dl').onclick=async()=>{const sh=$('sheet'),o=sh.style.transform;sh.style.transform='none';
-  try{await html2pdf().set({margin:0,filename:fileName()+'.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0,windowWidth:794},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(sh).save();bump()}
-  catch(err){alert('ดาวน์โหลดไม่สำเร็จ ลองใช้ปุ่ม "พิมพ์ / Save as PDF" แทน')}
-  sh.style.transform=o;fit()};
+$('dl').onclick=async()=>{
+  const host=document.createElement('div');
+  host.style.cssText='position:fixed;left:0;top:0;width:794px;height:1120px;z-index:-1;background:#fff;overflow:hidden';
+  const clone=$('sheet').cloneNode(true);
+  clone.style.cssText='transform:none;box-shadow:none;margin:0';
+  host.appendChild(clone);document.body.appendChild(host);
+  try{
+    await document.fonts.ready;await new Promise(r=>setTimeout(r,150));
+    await html2pdf().set({margin:0,filename:fileName()+'.pdf',image:{type:'png'},html2canvas:{scale:3,useCORS:true,scrollX:0,scrollY:0,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(clone).save();
+    bump();
+  }catch(err){alert('ดาวน์โหลดไม่สำเร็จ ลองใช้ปุ่ม "พิมพ์ / Save as PDF" แทน')}
+  host.remove();
+};
 window.addEventListener('resize',fit);
 
 document.querySelectorAll('[data-k]').forEach(e=>e.value=S[e.dataset.k]??'');
