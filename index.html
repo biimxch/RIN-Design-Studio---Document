@@ -112,7 +112,7 @@ button.pri{background:var(--acc);border-color:var(--acc);color:var(--on);font-we
 const ACC={th:'มสฤณา สุวรรณมงคล',en:'Masarina Suwanmongkol',no:'219-8-82363-8',bank:'กสิกรไทย'};
 const PF={quote:'QUO',invoice:'INV',receipt:'RCP'};
 const TT={quote:['ใบเสนอราคา/QUOTATION','ใบเสนอราคาเลขที่'],invoice:['ใบแจ้งหนี้/INVOICE','ใบแจ้งหนี้เลขที่'],receipt:['ใบเสร็จรับเงิน/RECEIPT','ใบเสร็จรับเงินเลขที่']};
-const WHTNOTE='* ผู้ว่าจ้างจะต้องออกหนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ) ให้ผู้ออกแบบทันทีหลังชำระค่าบริการ';
+const WHTNOTE='<b>* ผู้ว่าจ้างจะต้องออกหนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ) ให้ผู้ออกแบบทันทีหลังชำระค่าบริการ</b>';
 const D={type:'quote',company:'RIN Design Studio',by:'มสฤณา สุวรรณมงคล',project:'',date:new Date().toLocaleDateString('sv-SE'),cust:'',addr:'',
 qItems:[{d:'ค่าบริการออกแบบภายในพื้นที่ ... ตารางเมตร',p:0},{d:'ค่าบริการจัดทำแบบตกแต่งภายใน (แบบเหมาจ่าย)',p:0}],
 items:[{d:'ค่าบริการออกแบบภายในงวดที่ 1',p:0}],wht:3,due:'',
@@ -167,7 +167,7 @@ function renderPV(){
     table=`<table class="t"><tr><th>รายละเอียด</th><th>ราคา</th></tr>${rows}<tr><td style="height:34px"></td><td></td></tr>
     <tr class="g"><td>หักภาษี ณ ที่จ่าย ${fmt(num(S.wht))}%</td><td>-${fmt(c.wht)}</td></tr>
     <tr class="g"><td>ราคารวมทั้งหมด (บาท)</td><td>${fmt(c.total)}</td></tr></table>`;
-    if(inv)body=`<div style="margin-top:34px"><b>ช่องทางการชำระเงิน</b> <span class="red">* ชำระค่าบริการภายในวันที่ ${thDate(S.due)||'.................'}</span></div><div style="margin-top:8px">${accBlock()}</div>
+    if(inv)body=`<div style="margin-top:34px"><b>ช่องทางการชำระเงิน</b> <b class="red">* ชำระค่าบริการภายในวันที่ ${thDate(S.due)||'.................'}</b></div><div style="margin-top:8px">${accBlock()}</div>
     <div class="red" style="position:absolute;left:56px;right:56px;bottom:56px">${WHTNOTE}</div>`;
     if(rc)body=`<div style="display:flex;justify-content:space-between;margin-top:34px"><div><b>โอนเงินมายัง :</b><div style="margin-top:8px">${accBlock()}</div></div>
     <div style="text-align:center;width:270px"><div>ลงชื่อ .....................................................</div><div style="margin-top:18px">(${ACC.th})</div><div style="margin-top:8px"><b>ผู้รับเงิน</b></div></div></div>`;
