@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RIN – ใบเสนอราคา / ใบแจ้งหนี้ / ใบเสร็จรับเงิน</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=Cormorant+Garamond:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&family=Cormorant+Garamond:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root{--bg:#f4f2ef;--panel:#fff;--ink:#222;--mut:#777;--line:#ddd;--acc:#b89b78}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1a19;--panel:#262523;--ink:#eee;--mut:#999;--line:#3a3836}}
 :root[data-theme="dark"]{--bg:#1b1a19;--panel:#262523;--ink:#eee;--mut:#999;--line:#3a3836}
 *{box-sizing:border-box}[hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Sarabun',sans-serif;font-size:14px}
-.app{display:grid;grid-template-columns:420px 1fr;min-height:100vh}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Mitr',sans-serif;font-size:14px}
+.app{display:grid;grid-template-columns:2fr 3fr;min-height:100vh}
 .form{background:var(--panel);padding:18px;overflow-y:auto;height:100vh;position:sticky;top:0;border-right:1px solid var(--line)}
 .form h2{margin:0 0 12px;font-size:18px}
 label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
@@ -21,7 +21,11 @@ input,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-r
 details{border:1px solid var(--line);border-radius:8px;margin-top:10px}
 summary{cursor:pointer;padding:10px 12px;font-weight:600;list-style:none;display:flex;justify-content:space-between}
 summary::-webkit-details-marker{display:none}summary::after{content:'▾';color:var(--mut)}details[open] summary::after{content:'▴'}
-details>.b{padding:0 12px 12px}
+details>.b{padding:4px 12px 12px}
+details[open]{border-color:var(--acc)}
+details[open]>summary{background:var(--acc);color:#fff;border-radius:7px 7px 0 0}
+details[open]>summary::after{color:#fff}
+#sheet b,#sheet th,#sheet .g td{font-weight:500}#sheet .ti h1{font-weight:500}
 .item{border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px}
 .tot{padding:8px 0;font-weight:600}
 .chk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--ink)}.chk input{width:auto}.chk input[type=number]{width:76px}
@@ -33,7 +37,7 @@ button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:
 .pv{padding:16px;overflow:auto;height:100vh}
 .bar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;position:sticky;top:0;z-index:2}
 #wrap{margin:0 auto;width:794px}
-#sheet{width:794px;height:1120px;background:#fff;color:#000;padding:56px;position:relative;transform-origin:top left;box-shadow:0 2px 14px rgba(0,0,0,.18);font-size:14px;line-height:1.5;overflow:hidden}
+#sheet{width:794px;height:1120px;background:#fff;color:#000;padding:56px;position:relative;transform-origin:top left;box-shadow:0 2px 14px rgba(0,0,0,.18);font-size:13px;line-height:1.6;font-weight:300;overflow:hidden}
 #sheet .hd{display:flex;justify-content:space-between;align-items:flex-start}
 #sheet .logo{width:100px;height:100px;background:#f5f2f1;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:52px;color:#d9c3a5}
 #sheet .logo img{max-width:100%;max-height:100%}
@@ -110,10 +114,10 @@ const WHTNOTE='* ผู้ว่าจ้างจะต้องออกหน
 const D={type:'quote',company:'RIN Design Studio',by:'มสฤณา สุวรรณมงคล',project:'',date:new Date().toLocaleDateString('sv-SE'),cust:'',addr:'',
 qItems:[{d:'ค่าบริการออกแบบภายในพื้นที่ ... ตารางเมตร',p:0},{d:'ค่าบริการจัดทำแบบตกแต่งภายใน (แบบเหมาจ่าย)',p:0}],
 items:[{d:'ค่าบริการออกแบบภายในงวดที่ 1',p:0}],wht:3,due:'',
-inst:[{t:'ชำระก่อนเริ่มงาน',p:30},{t:'ชำระก่อนรับไฟล์งานออกแบบฉบับเต็ม',p:30},{t:'ชำระก่อนเริ่มถอดแบบตกแต่งภายใน',p:30},{t:'ชำระก่อนรับไฟล์ถอดแบบตกแต่งภายใน',p:10}],
+inst:[{t:'ชำระก่อนเริ่มงาน',p:''},{t:'ชำระก่อนรับไฟล์งานออกแบบฉบับเต็ม',p:''},{t:'ชำระก่อนรับไฟล์ถอดแบบตกแต่งภายใน',p:''}],
 rev:4,days:7,auto:true,seq:{quote:1,invoice:1,receipt:1},nos:{quote:'',invoice:'',receipt:''},logo:''};
 let S=Object.assign({},D);
-try{const s=localStorage.getItem('rin-doc-v2');if(s)S=Object.assign({},D,JSON.parse(s))}catch(e){}
+try{const s=localStorage.getItem('rin-doc-v3');if(s)S=Object.assign({},D,JSON.parse(s))}catch(e){}
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -174,7 +178,7 @@ function fit(){const s=Math.min(1,($('pv').clientWidth-32)/794);$('sheet').style
 function setSeg(){document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.type));
   document.querySelectorAll('[data-for]').forEach(e=>e.hidden=!e.dataset.for.split(' ').includes(S.type))}
 const syncSeq=()=>$('seq').value=S.seq[S.type];
-function upd(){try{localStorage.setItem('rin-doc-v2',JSON.stringify(S))}catch(e){}refresh();renderPV()}
+function upd(){try{localStorage.setItem('rin-doc-v3',JSON.stringify(S))}catch(e){}refresh();renderPV()}
 function bump(){if(S.auto){S.seq[S.type]++;syncSeq();upd()}}
 
 document.addEventListener('input',e=>{const t=e.target;
