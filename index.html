@@ -37,6 +37,7 @@ button.pri{background:var(--acc);border-color:var(--acc);color:var(--on);font-we
 .pv{padding:16px;overflow:auto;height:100vh}
 .bar{display:flex;gap:8px;justify-content:flex-end;margin:-16px -16px 12px;padding:12px 16px;position:sticky;top:-16px;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 .bar button{background:var(--panel)}.bar button.pri{background:var(--acc)}
+.bar button.grn{background:#DFE384;color:#222;border-color:#DFE384}
 #wrap{margin:0 auto;width:794px}
 #sheet{width:794px;height:1120px;background:#fff;color:#000;padding:56px;position:relative;transform-origin:top left;box-shadow:0 2px 14px rgba(0,0,0,.18);font-size:13px;line-height:1.6;font-weight:300;overflow:hidden}
 #sheet .hd{display:flex;justify-content:space-between;align-items:flex-start}
@@ -48,6 +49,7 @@ button.pri{background:var(--acc);border-color:var(--acc);color:var(--on);font-we
 #sheet .t th,#sheet .t td{border-right:1px solid #444;border-bottom:1px solid #444;padding:6px 10px}
 #sheet .t td+td,#sheet .t th+th{text-align:center;width:33%}
 #sheet .t .g td{background:#DFE384;font-weight:400}#sheet .t .g td:first-child{text-align:center}
+#sheet .t .g.s td{background:rgba(223,227,132,.6)}
 #sheet .g2{display:grid;grid-template-columns:165px 1fr;margin-top:24px}#sheet .g2 p{margin:0 0 7px}
 #sheet table.pay td{padding:4px 40px 4px 0;vertical-align:top}
 #sheet,#sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -77,7 +79,8 @@ button.pri{background:var(--acc);border-color:var(--acc);color:var(--on);font-we
     <div id="items"></div>
     <button class="add" id="addIt">+ เพิ่มรายการ</button>
     <div class="tot" style="margin-top:8px">รวมเป็นเงิน <span id="sub"></span> บาท</div>
-    <div data-for="invoice receipt"><label>หัก ณ ที่จ่าย (%)</label><input type="number" step="0.01" min="0" data-k="wht"></div>
+    <div data-for="invoice receipt"><label>ส่วนลดค่าบริการ (บาท)</label><input type="number" step="0.01" min="0" data-k="disc"></div>
+    <div data-for="invoice receipt"><label>หัก ณ ที่จ่าย (%) · คิดจากยอดหลังหักส่วนลด</label><input type="number" step="0.01" min="0" data-k="wht"></div>
   </div></details>
 
   <details data-for="invoice" open><summary>กำหนดชำระเงิน</summary><div class="b">
@@ -103,7 +106,7 @@ button.pri{background:var(--acc);border-color:var(--acc);color:var(--on);font-we
 </div>
 
 <div class="pv" id="pv">
-  <div class="bar"><button id="print">พิมพ์ / Save as PDF</button><button class="pri" id="dl">⬇ ดาวน์โหลด PDF</button></div>
+  <div class="bar"><button id="print">พิมพ์ / Save as PDF</button><button class="grn" id="jpg">ดาวน์โหลด JPG</button><button class="pri" id="dl">ดาวน์โหลด PDF</button></div>
   <div id="wrap"><div id="sheet"></div></div>
 </div>
 </div>
@@ -115,7 +118,7 @@ const TT={quote:['ใบเสนอราคา/QUOTATION','ใบเสนอ�
 const WHTNOTE='<b>* ผู้ว่าจ้างจะต้องออกหนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ) ให้ผู้ออกแบบทันทีหลังชำระค่าบริการ</b>';
 const D={type:'quote',company:'RIN Design Studio',by:'มสฤณา สุวรรณมงคล',project:'',date:new Date().toLocaleDateString('sv-SE'),cust:'',addr:'',
 qItems:[{d:'ค่าบริการออกแบบภายในพื้นที่ ... ตารางเมตร',p:0},{d:'ค่าบริการจัดทำแบบตกแต่งภายใน (แบบเหมาจ่าย)',p:0}],
-items:[{d:'ค่าบริการออกแบบภายในงวดที่ 1',p:0}],wht:3,due:'',
+items:[{d:'ค่าบริการออกแบบภายในงวดที่ 1',p:0}],disc:0,wht:3,due:'',
 inst:[{t:'ชำระก่อนเริ่มงาน',p:''},{t:'ชำระก่อนรับไฟล์งานออกแบบฉบับเต็ม',p:''},{t:'ชำระก่อนรับไฟล์ถอดแบบตกแต่งภายใน',p:''}],
 rev:4,days:7,auto:true,seq:{quote:1,invoice:1,receipt:1},nos:{quote:'',invoice:'',receipt:''},logo:''};
 let S=Object.assign({},D);
@@ -127,7 +130,7 @@ const num=v=>parseFloat(v)||0;
 const fmt=n=>n.toLocaleString('en-US',{minimumFractionDigits:Number.isInteger(+n.toFixed(2))?0:2,maximumFractionDigits:2});
 const thDate=s=>s?new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}):'';
 const cur=()=>S.type==='quote'?S.qItems:S.items;
-function calc(){const sub=cur().reduce((a,i)=>a+num(i.p),0);const wht=Math.round(sub*num(S.wht))/100;return{sub,wht,total:sub-wht}}
+function calc(){const sub=cur().reduce((a,i)=>a+num(i.p),0);const disc=Math.min(Math.max(num(S.disc),0),sub);const after=sub-disc;const wht=Math.round(after*num(S.wht))/100;return{sub,disc,after,wht,total:after-wht}}
 function autoNo(){return `${PF[S.type]}-${(S.date||'').replace(/-/g,'').slice(2)}${String(S.seq[S.type]).padStart(3,'0')}`}
 const getNo=()=>S.auto?autoNo():S.nos[S.type];
 function fileName(){const[y,m,d]=(S.date||'').split('-');const ds=y?d+m+(+y+543):'';const l3=(getNo().match(/\d{3}$/)||[''])[0];
@@ -165,7 +168,8 @@ function renderPV(){
       <p>3. ผู้ว่าจ้างต้องยืนยันราคาภายใน ${fmt(num(S.days))} วันทำการ นับจากวันออกใบเสนอราคา</p></div></div>`;
   }else{
     table=`<table class="t"><tr><th>รายละเอียด</th><th>ราคา</th></tr>${rows}<tr><td style="height:34px"></td><td></td></tr>
-    <tr class="g"><td>หักภาษี ณ ที่จ่าย ${fmt(num(S.wht))}%</td><td>-${fmt(c.wht)}</td></tr>
+    <tr class="g s"><td>ส่วนลดค่าบริการ</td><td>-${fmt(c.disc)}</td></tr>
+    <tr class="g s"><td>หักภาษี ณ ที่จ่าย ${fmt(num(S.wht))}%</td><td>-${fmt(c.wht)}</td></tr>
     <tr class="g"><td>ราคารวมทั้งหมด (บาท)</td><td>${fmt(c.total)}</td></tr></table>`;
     if(inv)body=`<div style="margin-top:34px"><b>ช่องทางการชำระเงิน</b> <b class="red">* ชำระค่าบริการภายในวันที่ ${thDate(S.due)||'.................'}</b></div><div style="margin-top:8px">${accBlock()}</div>
     <div class="red" style="position:absolute;left:56px;right:56px;bottom:56px">${WHTNOTE}</div>`;
@@ -220,7 +224,7 @@ function freezeLines(root){
     n.parentNode.replaceChild(f,n);
   });
 }
-$('dl').onclick=async()=>{
+async function withClone(fn){
   const host=document.createElement('div');
   host.style.cssText='position:fixed;left:0;top:0;width:794px;height:1120px;z-index:-1;background:#fff;overflow:hidden';
   const clone=$('sheet').cloneNode(true);
@@ -228,11 +232,19 @@ $('dl').onclick=async()=>{
   host.appendChild(clone);document.body.appendChild(host);
   try{
     await document.fonts.ready;await new Promise(r=>setTimeout(r,150));freezeLines(clone);
-    await html2pdf().set({margin:0,filename:fileName()+'.pdf',image:{type:'png'},html2canvas:{scale:3,useCORS:true,scrollX:0,scrollY:0,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(clone).save();
+    await fn(clone);
     bump();
   }catch(err){alert('ดาวน์โหลดไม่สำเร็จ ลองใช้ปุ่ม "พิมพ์ / Save as PDF" แทน')}
   host.remove();
-};
+}
+const H2C={scale:3,useCORS:true,scrollX:0,scrollY:0,backgroundColor:'#ffffff'};
+$('dl').onclick=()=>withClone(clone=>html2pdf().set({margin:0,filename:fileName()+'.pdf',image:{type:'png'},html2canvas:H2C,jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(clone).save());
+$('jpg').onclick=()=>withClone(async clone=>{
+  const canvas=await html2pdf().set({html2canvas:H2C}).from(clone).toCanvas().get('canvas');
+  const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',0.95));
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fileName()+'.jpg';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+});
 window.addEventListener('resize',fit);
 
 document.querySelectorAll('[data-k]').forEach(e=>e.value=S[e.dataset.k]??'');
