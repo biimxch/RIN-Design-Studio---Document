@@ -200,6 +200,26 @@ $('logoIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new File
 $('print').onclick=()=>{const sh=$('sheet'),o=sh.style.transform,ot=document.title;sh.style.transform='none';document.title=fileName();
   const st=document.createElement('style');st.textContent='@page{size:A4;margin:0}@media print{body *{visibility:hidden}#sheet,#sheet *{visibility:visible}#sheet{position:fixed;left:0;top:0;box-shadow:none}}';
   document.head.appendChild(st);window.print();st.remove();sh.style.transform=o;document.title=ot;bump()};
+function freezeLines(root){
+  // html2canvas ตัดบรรทัดภาษาไทยเองแล้วตัวอักษรซ้อนกัน → วัดบรรทัดจริงจาก browser แล้วล็อกด้วย <br> + nowrap
+  const seg=new Intl.Segmenter('th',{granularity:'word'});
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];
+  while(w.nextNode()){const n=w.currentNode;if(n.nodeValue.trim()&&!/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName))nodes.push(n)}
+  nodes.forEach(n=>{
+    const txt=n.nodeValue,parts=[...seg.segment(txt)].map(x=>x.segment),r=document.createRange();
+    let pos=0,lines=[],cur='',lastTop=null;
+    parts.forEach(p=>{r.setStart(n,pos);r.setEnd(n,pos+p.length);pos+=p.length;
+      const rc=r.getClientRects();if(!rc.length){cur+=p;return}
+      const top=Math.round(rc[0].top);
+      if(lastTop!==null&&Math.abs(top-lastTop)>4){lines.push(cur);cur=''}
+      cur+=p;lastTop=top});
+    lines.push(cur);
+    if(lines.length<2)return;
+    const f=document.createDocumentFragment();
+    lines.forEach((l,i)=>{const sp=document.createElement('span');sp.style.whiteSpace='nowrap';sp.textContent=l.replace(/^\s+|\s+$/g,'');f.appendChild(sp);if(i<lines.length-1)f.appendChild(document.createElement('br'))});
+    n.parentNode.replaceChild(f,n);
+  });
+}
 $('dl').onclick=async()=>{
   const host=document.createElement('div');
   host.style.cssText='position:fixed;left:0;top:0;width:794px;height:1120px;z-index:-1;background:#fff;overflow:hidden';
@@ -207,7 +227,7 @@ $('dl').onclick=async()=>{
   clone.style.cssText='transform:none;box-shadow:none;margin:0';
   host.appendChild(clone);document.body.appendChild(host);
   try{
-    await document.fonts.ready;await new Promise(r=>setTimeout(r,150));
+    await document.fonts.ready;await new Promise(r=>setTimeout(r,150));freezeLines(clone);
     await html2pdf().set({margin:0,filename:fileName()+'.pdf',image:{type:'png'},html2canvas:{scale:3,useCORS:true,scrollX:0,scrollY:0,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(clone).save();
     bump();
   }catch(err){alert('ดาวน์โหลดไม่สำเร็จ ลองใช้ปุ่ม "พิมพ์ / Save as PDF" แทน')}
